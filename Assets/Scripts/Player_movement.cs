@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
         cam = GetComponentInChildren<Camera_movement>();
     }
 
-    // Update is called once per frame
+    // Update is called once per frames
     void Update()
     {
         playerMovement();
