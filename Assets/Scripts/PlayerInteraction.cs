@@ -14,17 +14,40 @@ public class PlayerInteraction : MonoBehaviour
     private float tempMessageUntil;
     private GUIStyle guiStyle;
     private PlayerInventory inventory;
+    private Player player;
 
     void Awake()
     {
         inventory = GetComponent<PlayerInventory>();
+        if (inventory == null)
+        {
+            inventory = GetComponentInParent<PlayerInventory>();
+        }
+
+        player = GetComponent<Player>();
+        if (player == null)
+        {
+            player = GetComponentInParent<Player>();
+        }
     }
 
     void Update()
     {
         UpdateLookTarget();
 
-        if (Input.GetKeyDown(KeyCode.E) && currentInteractable != null)
+        if (!Input.GetKeyDown(KeyCode.E))
+        {
+            return;
+        }
+
+        if (player != null && player.IsHidden)
+        {
+            player.ExitHideSpot();
+            ShowTemporaryMessage("Saliste del escondite", 1.2f);
+            return;
+        }
+
+        if (currentInteractable != null)
         {
             currentInteractable.Interact(this);
         }
@@ -32,11 +55,29 @@ public class PlayerInteraction : MonoBehaviour
 
     public bool HasKey(string keyId)
     {
+        if (inventory == null)
+        {
+            inventory = GetComponent<PlayerInventory>();
+            if (inventory == null)
+            {
+                inventory = GetComponentInParent<PlayerInventory>();
+            }
+        }
+
         return inventory != null && inventory.HasKey(keyId);
     }
 
     public bool AddKey(string keyId)
     {
+        if (inventory == null)
+        {
+            inventory = GetComponent<PlayerInventory>();
+            if (inventory == null)
+            {
+                inventory = GetComponentInParent<PlayerInventory>();
+            }
+        }
+
         if (inventory == null)
         {
             Debug.LogWarning("PlayerInteraction: falta PlayerInventory en el jugador.");
@@ -54,6 +95,22 @@ public class PlayerInteraction : MonoBehaviour
 
     private void UpdateLookTarget()
     {
+        if (player == null)
+        {
+            player = GetComponent<Player>();
+            if (player == null)
+            {
+                player = GetComponentInParent<Player>();
+            }
+        }
+
+        if (player != null && player.IsHidden)
+        {
+            currentInteractable = null;
+            lookMessage = "[E] Salir del escondite";
+            return;
+        }
+
         if (playerCamera == null)
         {
             currentInteractable = null;

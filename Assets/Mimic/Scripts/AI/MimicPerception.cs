@@ -65,7 +65,15 @@ namespace MimicSpace.AI
 
             Vector3 toPlayer = playerTarget.position - transform.position;
             float distanceToPlayer = toPlayer.magnitude;
-            if (distanceToPlayer > viewDistance)
+
+            float viewDistanceMultiplier = 1f;
+            Player player = playerTarget.GetComponent<Player>();
+            if (player != null)
+            {
+                viewDistanceMultiplier = player.GetHiddenDetectionMultiplier();
+            }
+
+            if (distanceToPlayer > viewDistance * viewDistanceMultiplier)
             {
                 return;
             }
@@ -135,6 +143,16 @@ namespace MimicSpace.AI
             }
 
             float effectiveRange = hearingRange * Mathf.Clamp(noise.loudness, 0.1f, 3f);
+
+            if (noise.source != null)
+            {
+                Player player = noise.source.GetComponent<Player>();
+                if (player != null)
+                {
+                    effectiveRange *= player.GetHiddenDetectionMultiplier();
+                }
+            }
+
             float distance = Vector3.Distance(transform.position, noise.position);
             if (distance > effectiveRange)
             {
