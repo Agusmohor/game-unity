@@ -3,20 +3,20 @@ using UnityEngine;
 public class HideSpot : MonoBehaviour, IInteractable
 {
     [Header("Anchors")]
-    [SerializeField] private Transform hideAnchor;
-    [SerializeField] private Transform exitAnchor;
+    [SerializeField] protected Transform hideAnchor;
+    [SerializeField] protected Transform exitAnchor;
 
     [Header("Prompt")]
-    [SerializeField] private string enterPrompt = "[E] Esconderse";
-    [SerializeField] private string exitPrompt = "[E] Salir";
+    [SerializeField] protected string enterPrompt = "[E] Esconderse";
+    [SerializeField] protected string exitPrompt = "[E] Salir";
 
     [Header("Detection (Opcional)")]
-    [SerializeField] private bool reducesDetection = true;
-    [SerializeField] [Range(0.05f, 1f)] private float detectionMultiplier = 0.35f;
+    [SerializeField] protected bool reducesDetection = true;
+    [SerializeField] [Range(0.05f, 1f)] protected float detectionMultiplier = 0.35f;
     [Header("Camera While Hidden")]
-    [SerializeField] private bool restrictCameraLook = true;
-    [SerializeField] [Range(0f, 45f)] private float hiddenYawLimit = 4f;
-    [SerializeField] [Range(0f, 45f)] private float hiddenPitchLimit = 6f;
+    [SerializeField] protected bool restrictCameraLook = true;
+    [SerializeField] [Range(0f, 45f)] protected float hiddenYawLimit = 4f;
+    [SerializeField] [Range(0f, 45f)] protected float hiddenPitchLimit = 6f;
 
     public bool ReducesDetection => reducesDetection;
     public float DetectionMultiplier => detectionMultiplier;
