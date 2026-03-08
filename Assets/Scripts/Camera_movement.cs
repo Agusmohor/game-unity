@@ -11,6 +11,7 @@ public class Camera_movement : MonoBehaviour
     float restrictPitchCenter;
     float restrictYawLimit;
     float restrictPitchLimit;
+    bool lookInputEnabled = true;
 
     void Update()
     {
@@ -19,6 +20,11 @@ public class Camera_movement : MonoBehaviour
 
     public void camMovement()
     {
+        if (!lookInputEnabled)
+        {
+            return;
+        }
+
         float rot_x = Input.GetAxis("Mouse X") * sens * Time.deltaTime;
         float rot_y = Input.GetAxis("Mouse Y") * sens * Time.deltaTime;
 
@@ -52,6 +58,11 @@ public class Camera_movement : MonoBehaviour
     public void ClearHiddenLookLimits()
     {
         restrictLook = false;
+    }
+
+    public void SetLookInputEnabled(bool enabled)
+    {
+        lookInputEnabled = enabled;
     }
 
     public void SnapView(float worldYaw, float worldPitch = 0f)

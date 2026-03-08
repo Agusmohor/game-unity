@@ -12,12 +12,16 @@ public class Player : MonoBehaviour
 
     float verticalVelocity;
     bool isHidden;
+    bool movementLocked;
     HideSpot currentHideSpot;
     Vector3 preHidePosition;
     Quaternion preHideRotation;
     bool rbWasKinematic;
+    bool moveLockControllerWasEnabled;
+    bool moveLockRbWasKinematic;
 
     public bool IsHidden => isHidden;
+    public bool IsMovementLocked => movementLocked;
     public HideSpot CurrentHideSpot => currentHideSpot;
 
     void Start()
@@ -34,7 +38,7 @@ public class Player : MonoBehaviour
     {
         RotatePlayerWithCameraYaw();
 
-        if (isHidden)
+        if (isHidden || movementLocked)
         {
             verticalVelocity = 0f;
             return;
@@ -169,5 +173,57 @@ public class Player : MonoBehaviour
         }
 
         return Mathf.Clamp(currentHideSpot.DetectionMultiplier, 0.05f, 1f);
+    }
+
+    public void SetMovementLocked(bool locked)
+    {
+        if (movementLocked == locked)
+        {
+            return;
+        }
+
+        movementLocked = locked;
+        verticalVelocity = 0f;
+
+        if (isHidden)
+        {
+            return;
+        }
+
+        if (locked)
+        {
+            moveLockControllerWasEnabled = controller != null && controller.enabled;
+            if (controller != null)
+            {
+                controller.enabled = false;
+            }
+
+            if (rb != null)
+            {
+                moveLockRbWasKinematic = rb.isKinematic;
+                if (!moveLockRbWasKinematic)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+                rb.isKinematic = true;
+            }
+            return;
+        }
+
+        if (controller != null)
+        {
+            controller.enabled = moveLockControllerWasEnabled;
+        }
+
+        if (rb != null)
+        {
+            rb.isKinematic = moveLockRbWasKinematic;
+            if (!rb.isKinematic)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+        }
     }
 }

@@ -138,6 +138,15 @@ public class ObjectiveManager : MonoBehaviour
         electricityRestored = currentStep >= ObjectiveStep.Completed;
     }
 
+    public void AdvanceToStep(ObjectiveStep step)
+    {
+        AdvanceToAtLeast(step);
+        if (currentStep >= ObjectiveStep.Completed)
+        {
+            electricityRestored = true;
+        }
+    }
+
     private void AdvanceToAtLeast(ObjectiveStep next)
     {
         if (next <= currentStep)
@@ -155,6 +164,11 @@ public class ObjectiveManager : MonoBehaviour
     private void OnGUI()
     {
         if (!showObjectiveOnScreen)
+        {
+            return;
+        }
+
+        if (NoteUIManager.Instance != null && NoteUIManager.Instance.IsOpen)
         {
             return;
         }

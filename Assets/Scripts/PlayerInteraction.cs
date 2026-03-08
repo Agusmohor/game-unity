@@ -35,6 +35,11 @@ public class PlayerInteraction : MonoBehaviour
     {
         UpdateLookTarget();
 
+        if (NoteUIManager.Instance != null && NoteUIManager.Instance.IsOpen)
+        {
+            return;
+        }
+
         if (!Input.GetKeyDown(KeyCode.E))
         {
             return;
@@ -95,6 +100,13 @@ public class PlayerInteraction : MonoBehaviour
 
     private void UpdateLookTarget()
     {
+        if (NoteUIManager.Instance != null && NoteUIManager.Instance.IsOpen)
+        {
+            currentInteractable = null;
+            lookMessage = "";
+            return;
+        }
+
         if (player == null)
         {
             player = GetComponent<Player>();
