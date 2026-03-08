@@ -8,8 +8,12 @@ public class Door : MonoBehaviour, IInteractable
     [Header("Lock")]
     [SerializeField] private bool isLocked = false;
     [SerializeField] private string requiredKeyId = "";
+    [Header("Objective (optional)")]
+    [SerializeField] private bool notifyObjectiveOnFirstOpen = false;
+    [SerializeField] private string objectiveDoorId = "";
 
     private bool isOpen;
+    private bool objectiveOpenNotified;
     private Quaternion closedRotation;
     private Quaternion openRotation;
 
@@ -49,6 +53,12 @@ public class Door : MonoBehaviour, IInteractable
         }
 
         isOpen = !isOpen;
+
+        if (isOpen && notifyObjectiveOnFirstOpen && !objectiveOpenNotified && ObjectiveManager.Instance != null)
+        {
+            ObjectiveManager.Instance.RegisterDoorOpened(objectiveDoorId);
+            objectiveOpenNotified = true;
+        }
     }
 
     public string GetInteractionPrompt(PlayerInteraction interactor)
