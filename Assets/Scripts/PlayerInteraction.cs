@@ -15,6 +15,8 @@ public class PlayerInteraction : MonoBehaviour
     private GUIStyle guiStyle;
     private PlayerInventory inventory;
     private Player player;
+    private FlashlightController flashlight;
+    private string lastHudPrompt = "";
 
     void Awake()
     {
@@ -29,11 +31,18 @@ public class PlayerInteraction : MonoBehaviour
         {
             player = GetComponentInParent<Player>();
         }
+
+        flashlight = GetComponent<FlashlightController>();
+        if (flashlight == null)
+        {
+            flashlight = GetComponentInChildren<FlashlightController>();
+        }
     }
 
     void Update()
     {
         UpdateLookTarget();
+        UpdateHudPrompt();
 
         if (NoteUIManager.Instance != null && NoteUIManager.Instance.IsOpen)
         {
@@ -96,6 +105,11 @@ public class PlayerInteraction : MonoBehaviour
     {
         tempMessage = message;
         tempMessageUntil = Time.time + duration;
+
+        if (GameHUD.Instance != null)
+        {
+            GameHUD.Instance.ShowStatusMessage(message, duration);
+        }
     }
 
     private void UpdateLookTarget()
@@ -142,14 +156,67 @@ public class PlayerInteraction : MonoBehaviour
         lookMessage = currentInteractable != null ? currentInteractable.GetInteractionPrompt(this) : "";
     }
 
-    private void OnGUI()
+    private void UpdateHudPrompt()
     {
-        if (!showPromptOnScreen)
+        if (GameHUD.Instance == null)
         {
             return;
         }
 
-        string message = Time.time < tempMessageUntil ? tempMessage : lookMessage;
+        string prompt = BuildMainPrompt();
+        if (prompt == lastHudPrompt)
+        {
+            return;
+        }
+
+        lastHudPrompt = prompt;
+        if (string.IsNullOrEmpty(prompt))
+        {
+            GameHUD.Instance.ClearInteractionPrompt();
+        }
+        else
+        {
+            GameHUD.Instance.SetInteractionPrompt(prompt);
+        }
+    }
+
+    private string BuildMainPrompt()
+    {
+        if (NoteUIManager.Instance != null && NoteUIManager.Instance.IsOpen)
+        {
+            return "";
+        }
+
+        if (!string.IsNullOrEmpty(lookMessage))
+        {
+            return lookMessage;
+        }
+
+        return GetFlashlightPrompt();
+    }
+
+    private string GetFlashlightPrompt()
+    {
+        if (flashlight == null)
+        {
+            flashlight = GetComponent<FlashlightController>();
+            if (flashlight == null)
+            {
+                flashlight = GetComponentInChildren<FlashlightController>();
+            }
+        }
+
+        return flashlight != null ? flashlight.GetTogglePrompt() : "";
+    }
+
+    private void OnGUI()
+    {
+        if (!showPromptOnScreen || GameHUD.Instance != null)
+        {
+            return;
+        }
+
+        string message = Time.time < tempMessageUntil ? tempMessage : BuildMainPrompt();
         if (string.IsNullOrEmpty(message))
         {
             return;
@@ -167,6 +234,14 @@ public class PlayerInteraction : MonoBehaviour
         GUI.Label(rect, message, guiStyle);
     }
 
+    private void OnDisable()
+    {
+        if (GameHUD.Instance != null)
+        {
+            GameHUD.Instance.ClearInteractionPrompt();
+        }
+    }
+
     private void OnDrawGizmosSelected()
     {
         if (playerCamera == null)
@@ -181,4 +256,3 @@ public class PlayerInteraction : MonoBehaviour
         Gizmos.DrawSphere(end, 0.04f);
     }
 }
-// prueba ssh

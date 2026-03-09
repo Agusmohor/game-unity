@@ -25,6 +25,7 @@ namespace MimicSpace.AI
         private int waypointIndex;
         private float waitTimer;
         private bool waitingAtWaypoint;
+        private bool warnedNoNavMesh;
 
         public Vector3 Position => transform.position;
         public bool HasWaypoints => waypoints.Count > 0;
@@ -52,6 +53,11 @@ namespace MimicSpace.AI
 
         public void MoveTo(Vector3 destination, float speed)
         {
+            if (!EnsureAgentOnNavMesh(true))
+            {
+                return;
+            }
+
             waitingAtWaypoint = false;
             agent.speed = speed;
 
@@ -66,6 +72,11 @@ namespace MimicSpace.AI
 
         public bool ReachedDestination()
         {
+            if (!EnsureAgentOnNavMesh(true))
+            {
+                return false;
+            }
+
             if (agent.pathPending)
             {
                 return false;
@@ -81,12 +92,22 @@ namespace MimicSpace.AI
 
         public void Stop()
         {
+            if (!EnsureAgentOnNavMesh(false))
+            {
+                return;
+            }
+
             agent.ResetPath();
         }
 
         public void TickPatrol()
         {
             if (!HasWaypoints)
+            {
+                return;
+            }
+
+            if (!EnsureAgentOnNavMesh(true))
             {
                 return;
             }
@@ -161,6 +182,41 @@ namespace MimicSpace.AI
             }
 
             waypointIndex = Mathf.Min(waypointIndex + 1, waypoints.Count - 1);
+        }
+
+        private bool EnsureAgentOnNavMesh(bool tryRelocate)
+        {
+            if (agent == null || !agent.enabled || !gameObject.activeInHierarchy)
+            {
+                return false;
+            }
+
+            if (agent.isOnNavMesh)
+            {
+                warnedNoNavMesh = false;
+                return true;
+            }
+
+            if (tryRelocate)
+            {
+                if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, navSampleDistance, NavMesh.AllAreas))
+                {
+                    agent.Warp(hit.position);
+                    if (agent.isOnNavMesh)
+                    {
+                        warnedNoNavMesh = false;
+                        return true;
+                    }
+                }
+            }
+
+            if (!warnedNoNavMesh)
+            {
+                warnedNoNavMesh = true;
+                Debug.LogWarning("MimicMotorNavMesh: NavMeshAgent fuera de NavMesh. Revisa Bake/posicion del Mimic.");
+            }
+
+            return false;
         }
     }
 }

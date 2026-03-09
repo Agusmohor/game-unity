@@ -155,6 +155,15 @@ public class ObjectiveManager : MonoBehaviour
         }
 
         currentStep = next;
+
+        if (GameHUD.Instance != null)
+        {
+            string status = currentStep == ObjectiveStep.Completed
+                ? "Objetivo completado: electricidad restaurada"
+                : "Objetivo actualizado";
+            GameHUD.Instance.ShowStatusMessage(status, 2f);
+        }
+
         if (logChanges)
         {
             Debug.Log("Objective -> " + currentStep);
