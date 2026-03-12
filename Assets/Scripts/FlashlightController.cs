@@ -142,6 +142,7 @@ public class FlashlightController : MonoBehaviour
             SetFlashlight(false);
         }
     }
+    
 
     public void RefillBattery()
     {
